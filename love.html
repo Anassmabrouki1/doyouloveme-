@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Do you still love me?</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: sans-serif;
+      background: #fff0f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #app {
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      max-width: 500px;
+    }
+    .hearts-bg {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; overflow: hidden; z-index: 0;
+    }
+    .floating-heart {
+      position: absolute;
+      font-size: 18px;
+      opacity: 0;
+      animation: floatUp 4s ease-in infinite;
+    }
+    @keyframes floatUp {
+      0% { opacity: 0; transform: translateY(100vh) scale(0.5); }
+      20% { opacity: 0.5; }
+      80% { opacity: 0.3; }
+      100% { opacity: 0; transform: translateY(-100px) scale(1.2) rotate(15deg); }
+    }
+    .content { position: relative; z-index: 1; }
+    .emoji { font-size: 64px; margin-bottom: 1rem; display: block; }
+    h1 {
+      font-size: 26px; font-weight: 600;
+      color: #c0395f;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      font-size: 15px; color: #a0607a;
+      margin-bottom: 2rem; line-height: 1.5;
+    }
+    .btn-row {
+      display: flex; gap: 16px; justify-content: center;
+      align-items: center; flex-wrap: wrap;
+    }
+    .btn-yes {
+      background: #D4537E; color: white;
+      border: none; border-radius: 999px;
+      font-size: 16px; font-weight: 600;
+      padding: 14px 32px;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s, font-size 0.3s, padding 0.3s;
+      white-space: nowrap;
+    }
+    .btn-yes:hover { background: #993556; transform: scale(1.05); }
+    .btn-no {
+      background: transparent;
+      color: #aaa;
+      border: 1px solid #ccc;
+      border-radius: 999px;
+      font-size: 15px; font-weight: 400;
+      padding: 12px 28px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-no:hover { background: #f9f0f3; }
+
+    #resultScreen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 100vh;
+      padding: 2rem;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #fff0f5;
+      z-index: 100;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 8px; height: 8px;
+      border-radius: 2px;
+      opacity: 0;
+      animation: confettiFall 2.5s ease-in forwards;
+    }
+    @keyframes confettiFall {
+      0% { opacity: 1; transform: translateY(-20px) rotate(0deg); }
+      100% { opacity: 0; transform: translateY(100vh) rotate(360deg); }
+    }
+    .big-heart {
+      font-size: 100px;
+      animation: heartbeat 0.8s ease-in-out infinite;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.18); }
+    }
+    .result-title {
+      font-size: 32px; font-weight: 700;
+      color: #D4537E;
+      margin-bottom: 0.75rem;
+    }
+    .result-sub {
+      font-size: 16px; color: #a0607a;
+      line-height: 1.7; max-width: 340px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="hearts-bg" id="heartsBg"></div>
+
+<div id="app">
+  <div class="content" id="questionScreen">
+    <span class="emoji">💝</span>
+    <h1 id="mainTitle">Do you still love me najoua?</h1>
+    <p class="subtitle" id="subtitle">fkri mzn alghzala...</p>
+    <div class="btn-row">
+      <button class="btn-no" id="noBtn" onclick="handleNo()">No</button>
+      <button class="btn-yes" id="yesBtn" onclick="handleYes()">Yes, Bzfffff Ga33!</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultScreen"></div>
+
+<script>
+  let noClickCount = 0;
+  let yesFontSize = 16;
+  let yesPadV = 14;
+  let yesPadH = 32;
+
+  const noBtn = document.getElementById('noBtn');
+  const yesBtn = document.getElementById('yesBtn');
+  const heartsBg = document.getElementById('heartsBg');
+  const subtitle = document.getElementById('subtitle');
+  const mainTitle = document.getElementById('mainTitle');
+
+  const moveMessages = [
+    "Are you sure? 🥺",
+    "Fkri mzn...",
+    "t2kdi!",
+    "Come on, really? 😢",
+    "Are you kidding me?!",
+    "Please reconsider... 💔",
+    "adik l9tita jawbi mzn.",
+    "Last chance! 😭",
+    "You're making me cry...",
+    "Just click the other one!"
+  ];
+
+  function handleNo() {
+    noClickCount++;
+
+    yesFontSize = Math.min(yesFontSize + 5, 40);
+    yesPadV = Math.min(yesPadV + 4, 40);
+    yesPadH = Math.min(yesPadH + 8, 80);
+
+    yesBtn.style.fontSize = yesFontSize + 'px';
+    yesBtn.style.padding = yesPadV + 'px ' + yesPadH + 'px';
+
+    const msg = moveMessages[Math.min(noClickCount - 1, moveMessages.length - 1)];
+    subtitle.textContent = msg;
+    subtitle.style.color = '#D4537E';
+
+    noBtn.style.opacity = Math.max(0.2, 1 - noClickCount * 0.09);
+    noBtn.style.fontSize = Math.max(10, 15 - noClickCount) + 'px';
+    noBtn.style.padding = '8px 16px';
+
+    if (noClickCount >= 5) mainTitle.textContent = "Ok but... are you SURE sure? 💔";
+    if (noClickCount >= 8) mainTitle.textContent = "Please... just click yes 🙏";
+    if (noClickCount >= 10) {
+      noBtn.style.display = 'none';
+      mainTitle.textContent = "There's only one choice left 😅";
+    }
+  }
+
+  function handleYes() {
+    document.getElementById('app').style.display = 'none';
+    const rs = document.getElementById('resultScreen');
+    rs.style.display = 'flex';
+
+    const colors = ['#D4537E','#F4C0D1','#FAC775','#9FE1CB','#CECBF6','#F0997B'];
+    for (let i = 0; i < 35; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti-piece';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.left = Math.random() * 100 + '%';
+      c.style.top = '10%';
+      c.style.animationDelay = Math.random() * 1.8 + 's';
+      c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      rs.appendChild(c);
+    }
+
+    rs.innerHTML += `
+      <span class="big-heart">❤️</span>
+      <div class="result-title">She loves you!</div>
+      <p class="result-sub">Of course she does. She always did.<br>l3zzzzzzzzzzzz siftili db message chnu jawbti 💌</p>
+    `;
+  }
+
+  function spawnHeart() {
+    const h = document.createElement('div');
+    h.className = 'floating-heart';
+    h.textContent = ['❤️','💕','💖','💗','💓'][Math.floor(Math.random() * 5)];
+    h.style.left = Math.random() * 100 + '%';
+    h.style.bottom = '0';
+    h.style.animationDelay = '0s';
+    h.style.animationDuration = (3 + Math.random() * 2) + 's';
+    heartsBg.appendChild(h);
+    setTimeout(() => h.remove(), 5000);
+  }
+
+  setInterval(spawnHeart, 900);
+</script>
+
+</body>
+</html>
